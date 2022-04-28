@@ -23,4 +23,17 @@ class OfficeControllerTest extends TestCase
         $this->assertNotNull($response->json('meta'));
         $this->assertNotNull($response->json('links'));
     }
+
+    public function test_only_lists_offices_that_are_not_hidden_and_approved()
+    {
+        Office::factory(3)->create();
+
+        Office::factory()->create(['hidden' => true]);
+        Office::factory()->create(['approval_status' => Office::APPROVAL_PENDING]);
+
+        $response = $this->get('/api/offices');
+
+        $response->assertOk();
+        $response->assertJsonCount(3, 'data');
+    }
 }
